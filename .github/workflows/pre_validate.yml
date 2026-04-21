@@ -44,7 +44,7 @@ jobs:
       - name: Checkout workflow_configs repo
         uses: actions/checkout@v4
         with:
-          repository: ashkan-farivarmoheb/workflow_configs
+          repository: admin-solwing/workflow_configs
           path: workflow_configs
 
       - name: Read environments
