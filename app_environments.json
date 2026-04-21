@@ -1,1 +1,6 @@
-["develop", "sit", "stg", "prod"]
+[
+    "develop",
+    "sit",
+    "stg",
+    "prod"
+]
