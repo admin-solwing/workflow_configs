@@ -13,7 +13,29 @@ on:
       service_version:
         type: string
       odoo_base_tag:
-        type: string  
+        type: string
+      runner_label:
+        # Runner selection, threaded from the caller.
+        #
+        # A caller CANNOT override a callee's `runs-on` — a reusable workflow's
+        # jobs resolve runners against the calling repository, but only against
+        # the label the callee itself declares. So a hardcoded `ubuntu-latest`
+        # here pinned every consumer to GitHub-hosted with no opt-out, three
+        # levels down and invisible from the caller.
+        #
+        # That became load-bearing rather than cosmetic when GitHub-hosted
+        # dispatch was blocked account-wide: this job did not merely run in the
+        # wrong place, it never started at all (no runner assigned, no log), so
+        # the whole CI run failed on a job with nothing wrong with it.
+        #
+        # Defaulting to `ubuntu-latest` keeps every existing consumer's
+        # behaviour byte-identical — this is purely additive.
+        description: >-
+          Runner label to execute on. Defaults to ubuntu-latest, which is the
+          previous hardcoded behaviour.
+        required: false
+        type: string
+        default: ubuntu-latest
     outputs:
       env-options:
         description: "List of valid environments"
@@ -33,7 +55,11 @@ on:
 
 jobs:
   pre-validate:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_label }}
+    # This job reads five JSON files with `jq` and needs no service containers,
+    # so it runs directly on the runner. `jq` is present on `ubuntu-latest` and
+    # on the NDIS pool image; a new pool must provide it.
+    timeout-minutes: 10
     outputs:
       env-options: ${{ steps.read-envs.outputs.environments }}
       app-env-options: ${{ steps.read-envs.outputs.app-environments }}
